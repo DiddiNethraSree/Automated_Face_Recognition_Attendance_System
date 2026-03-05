@@ -3,8 +3,10 @@ import face_recognition
 import pickle
 import numpy as np
 from datetime import datetime, time
-from zoneinfo import ZoneInfo
-from database import init_today, mark_present, is_working_day
+from database import (
+    init_today, mark_present, is_working_day,
+    init_today_periods, mark_period_present, get_current_period, PERIODS
+)
 
 # ---------------- CONFIG ----------------
 THRESHOLD = 0.45
@@ -18,27 +20,38 @@ known_encodings = np.array(data["encodings"])
 known_names = np.array(data["names"])
 
 all_students = set(known_names)
-present_students = set()
+present_students = set()          # For legacy daily attendance
+present_period_set = set()        # Track (student_id, period) combos already marked
 
-# Attendance windows
-WINDOWS = [(time(7,30), time(10,0)), (time(10,30), time(13,0))]
-IST = ZoneInfo("Asia/Kolkata")
-
+# Build attendance windows from PERIODS config
 def in_attendance_window(now=None):
-    now = now or datetime.now(IST).time()
-    for start, end in WINDOWS:
-        if start <= now <= end:
+    now_dt = now or datetime.now().time()
+    try:
+        from zoneinfo import ZoneInfo
+        now_dt = now or datetime.now(ZoneInfo("Asia/Kolkata")).time()
+    except Exception:
+        pass
+    for pnum, (sh, sm, eh, em) in PERIODS.items():
+        if time(sh, sm) <= now_dt < time(eh, em):
             return True
     return False
 
 # Initialize today's attendance only on working days
-today_str = datetime.now(IST).strftime("%Y-%m-%d")
+try:
+    from zoneinfo import ZoneInfo
+    IST = ZoneInfo("Asia/Kolkata")
+except Exception:
+    IST = None
+
+today_str = (datetime.now(IST) if IST else datetime.now()).strftime("%Y-%m-%d")
 if is_working_day(today_str):
     init_today(all_students)
+    init_today_periods(all_students)
 
 # ---------------- START CAMERA ----------------
 cap = cv2.VideoCapture(0)
 print("Press 'Q' to stop")
+print(f"📋 Period Schedule: {', '.join(f'P{k}: {v[0]:02d}:{v[1]:02d}-{v[2]:02d}:{v[3]:02d}' for k, v in PERIODS.items())}")
 
 while True:
     ret, frame = cap.read()
@@ -60,13 +73,27 @@ while True:
         # Scale back box
         top, right, bottom, left = top*2, right*2, bottom*2, left*2
 
-        if best_dist < THRESHOLD and in_attendance_window() and is_working_day(datetime.now(IST).strftime("%Y-%m-%d")):
+        now_dt = datetime.now(IST) if IST else datetime.now()
+        if best_dist < THRESHOLD and in_attendance_window() and is_working_day(now_dt.strftime("%Y-%m-%d")):
             student_id = known_names[best_idx]
             accuracy = round((1 - best_dist) * 100, 2)
 
+            # Legacy daily attendance (unchanged)
             if student_id not in present_students:
                 mark_present(student_id)
                 present_students.add(student_id)
+
+            # Period-wise attendance (new)
+            current_period = get_current_period(now_dt.time())
+            if current_period is not None:
+                combo = (student_id, current_period)
+                if combo not in present_period_set:
+                    result = mark_period_present(student_id, current_period)
+                    if result:
+                        present_period_set.add(combo)
+                        pnum, status, value = result
+                        status_icon = "✅" if status == "present" else "❌"
+                        print(f"  {status_icon} {student_id} → P{pnum} {status} ({value})")
 
             label = f"{student_id} ({accuracy}%)"
             color = (0, 255, 0)
@@ -99,4 +126,6 @@ print("\n📊 ATTENDANCE SUMMARY (PRESENT ONLY)")
 print(f"Present: {len(present_students)}")
 for s in sorted(present_students):
     print(" ✔", s)
+
+print(f"\n📋 PERIOD-WISE MARKS: {len(present_period_set)} period entries recorded")
 

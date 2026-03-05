@@ -1,3 +1,18 @@
+/* ====================================================
+   GLOBAL: Bapatla Engineering College — Old English Font
+   ==================================================== */
+.bec-college-name {
+    font-family: "Old English Text MT", "UnifrakturCook", "MedievalSharp",
+        "Blackletter", Georgia, "Times New Roman", serif !important;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    font-size: inherit;
+}
+
+/* Ensure the Google Fonts fallback (UnifrakturCook) is loaded via @import */
+/* Already loaded in pages that use it — style.css handles the class only */
+
 :root {
     --primary: #4f46e5;
     --primary-dark: #4338ca;
@@ -13,11 +28,14 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
-    
+
     /* Role Colors */
-    --role-student: #f97316; /* Orange */
-    --role-staff: #2563eb;   /* Blue */
-    --role-hod: #7c3aed;     /* Purple */
+    --role-student: #f97316;
+    /* Orange */
+    --role-staff: #2563eb;
+    /* Blue */
+    --role-hod: #7c3aed;
+    /* Purple */
 }
 
 * {
@@ -42,8 +60,15 @@ a {
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .fade-in {
@@ -188,13 +213,29 @@ a {
 }
 
 /* Role Specific Colors */
-.card-student { color: var(--role-student); }
-.card-staff { color: var(--role-staff); }
-.card-hod { color: var(--role-hod); }
+.card-student {
+    color: var(--role-student);
+}
 
-.card-student:hover { border-color: var(--role-student); }
-.card-staff:hover { border-color: var(--role-staff); }
-.card-hod:hover { border-color: var(--role-hod); }
+.card-staff {
+    color: var(--role-staff);
+}
+
+.card-hod {
+    color: var(--role-hod);
+}
+
+.card-student:hover {
+    border-color: var(--role-student);
+}
+
+.card-staff:hover {
+    border-color: var(--role-staff);
+}
+
+.card-hod:hover {
+    border-color: var(--role-hod);
+}
 
 /* Login Modal/Form Area */
 .login-container {
@@ -205,7 +246,8 @@ a {
     width: 100%;
     max-width: 400px;
     margin-top: 2rem;
-    display: none; /* Hidden by default */
+    display: none;
+    /* Hidden by default */
     animation: fadeIn 0.4s ease-out;
 }
 
@@ -321,9 +363,17 @@ a {
     transition: width 1s ease-out;
 }
 
-.bg-success { background-color: var(--success); }
-.bg-warning { background-color: var(--warning); }
-.bg-danger { background-color: var(--danger); }
+.bg-success {
+    background-color: var(--success);
+}
+
+.bg-warning {
+    background-color: var(--warning);
+}
+
+.bg-danger {
+    background-color: var(--danger);
+}
 
 /* Tables & Lists */
 .card-panel {
@@ -348,7 +398,8 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
     padding: 1rem 1.5rem;
     text-align: left;
     border-bottom: 1px solid var(--border);
@@ -379,13 +430,55 @@ tr:hover td {
     display: inline-block;
 }
 
-.status-success { background-color: #dcfce7; color: #166534; }
-.status-warning { background-color: #fef3c7; color: #92400e; }
-.status-danger { background-color: #fee2e2; color: #991b1b; }
+.status-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-late {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-od {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
 
 /* Grid for HOD lists */
 .hod-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
+}
+
+/* Micro-animation for status badges */
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.status-badge {
+    transition: all 0.2s;
+}
+
+.status-badge:hover {
+    animation: badgePulse 0.4s ease;
 }

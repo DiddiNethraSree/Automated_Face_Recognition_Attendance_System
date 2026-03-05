@@ -53,7 +53,7 @@ for student_id in os.listdir(DATASET_PATH):
             known_names.append(student_id)
             print(f"[OK] Encoded {student_id} from {file}")
 
-print(f"\n✅ Encoded {len(known_encodings)} face images successfully")
+print(f"\n[OK] Encoded {len(known_encodings)} face images successfully")
 
 data = {
     "encodings": known_encodings,

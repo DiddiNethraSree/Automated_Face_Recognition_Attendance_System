@@ -2,13 +2,21 @@
 
 {% block content %}
 <style>
+    /* Override base.html .main-content to remove side white borders */
+    .main-content {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
     .hod-bg-container {
-        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
-            url('/static/bec_1.jpg') center/cover fixed;
-        min-height: 100vh;
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/static/bec_1.jpg') center/cover fixed;
+        min-height: calc(100vh - 60px);
         padding: 2rem;
         color: white;
         transition: background-image 0.8s ease;
+        margin: 0;
+        width: 100%;
     }
 
     .glass-panel {
@@ -31,7 +39,7 @@
     }
 
     .filter-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.6rem;
         border-radius: 6px;
         text-decoration: none;
         color: #475569;
@@ -39,7 +47,7 @@
         font-weight: 600;
         transition: all 0.2s;
         border: 2px solid transparent;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 
     .filter-btn:hover {
@@ -53,28 +61,30 @@
     }
 
     .generate-btn-group {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
         margin: 1.5rem 0;
+        flex-wrap: wrap;
     }
 
     .gen-btn {
-        padding: 1.25rem;
+        padding: 0.8rem 1rem;
         border: none;
-        border-radius: 12px;
-        font-size: 1rem;
+        border-radius: 10px;
+        font-size: 0.85rem;
         font-weight: 700;
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.4rem;
         color: white;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         text-decoration: none;
+        white-space: nowrap;
     }
 
     .gen-btn:hover {
@@ -332,8 +342,7 @@
         <div class="dashboard-header" style="margin-bottom: 0;">
             <div>
                 <h1 style="font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">🎓 HOD PORTAL</h1>
-                <p style="opacity: 0.9; font-size: 1.1rem;">📋 Higher Authority Portal • Period-Wise Attendance &amp;
-                    Reporting
+                <p style="opacity: 0.9; font-size: 1.1rem;">📋 Higher Authority Portal
                     <span class="dept-badge" style="margin-left:0.5rem;">🏫 Dept: {{ hod_dept }}</span>
                 </p>
             </div>
@@ -384,10 +393,10 @@
                     <option value="B">B</option>
                     <option value="C">C</option>
                 </select>
-                <input id="searchId" class="filter-btn" style="background:#fff; width:160px;"
-                    placeholder="🔍 Search Student ID">
-                <label class="filter-btn" style="background:#fff;">
-                    <input type="checkbox" id="deriveToggle"> Include derived year from ID
+                <input id="searchId" class="filter-btn" style="background:#fff; width:130px;"
+                    placeholder="🔍 Search ID">
+                <label class="filter-btn" style="background:#fff; display:flex; align-items:center; gap:4px;">
+                    <input type="checkbox" id="deriveToggle"> Include derived year
                 </label>
             </div>
         </div>
@@ -436,8 +445,8 @@
                                     <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">{{ sid }}</div>
                                     <div style="margin-top:0.25rem;">
                                         <span
-                                            class="status-badge {% if overall_percentages.get(sid, 0) >= 75 %}status-success{% elif overall_percentages.get(sid, 0) >= 65 %}status-warning{% else %}status-danger{% endif %}"
-                                            style="font-size:0.75rem;">
+                                            class="status-badge pct-display pct-student-{{ sid }} {% if overall_percentages.get(sid, 0) >= 75 %}status-success{% elif overall_percentages.get(sid, 0) >= 65 %}status-warning{% else %}status-danger{% endif %}"
+                                            data-sid="{{ sid }}" style="font-size:0.75rem;">
                                             Total: {{ overall_percentages.get(sid, 0) }}%
                                         </span>
                                     </div>
@@ -619,10 +628,12 @@
         }
     }
 
+    let actionHistory = [];
+
     // ---- Cycle Status (Present → Late → Absent → Present) ----
-    async function cycleStatus(studentId, date, period, currentStatus, btn) {
+    async function cycleStatus(studentId, date, period, currentStatus, btn, isUndo = false) {
         const nextMap = { 'present': 'absent', 'absent': 'present' };
-        const newStatus = nextMap[currentStatus] || 'present';
+        const newStatus = isUndo ? currentStatus : (nextMap[currentStatus] || 'present');
         try {
             const res = await fetch('/api/toggle-attendance', {
                 method: 'POST',
@@ -634,12 +645,76 @@
                 const nextClass = { 'present': 'period-present', 'absent': 'period-absent' };
                 const nextIcon = { 'present': '✅', 'absent': '❌' };
 
+                if (!isUndo) {
+                    // Save to history before updating state
+                    actionHistory.push({
+                        studentId, date, period, previousStatus: currentStatus, btn
+                    });
+                }
+
                 btn.className = `period-badge ${nextClass[data.status]}`;
                 btn.innerHTML = `P${period} ${nextIcon[data.status]}`;
                 btn.setAttribute('onclick', `event.stopPropagation(); cycleStatus('${studentId}', '${date}', ${period}, '${data.status}', this)`);
+
+                // Update percentage silently
+                updatePercentagesSilent();
             }
         } catch (e) { alert('Error toggling attendance'); }
     }
+
+    async function updatePercentagesSilent() {
+        const date = document.getElementById('dateFilter') ? document.getElementById('dateFilter').value : '';
+        const year = document.getElementById('yearSelect') ? document.getElementById('yearSelect').value : '';
+        const branch = document.getElementById('branchSelect') ? document.getElementById('branchSelect').value : '';
+        const section = document.getElementById('sectionSelect') ? document.getElementById('sectionSelect').value : '';
+        const q = document.getElementById('searchId') ? document.getElementById('searchId').value : '';
+        const derive = document.getElementById('deriveToggle') && document.getElementById('deriveToggle').checked ? '1' : '0';
+        const filter = "{{ current_filter }}";
+        const url = `/api/hod-data?filter=${encodeURIComponent(filter)}&date=${encodeURIComponent(date)}&year=${encodeURIComponent(year)}&branch=${encodeURIComponent(branch)}&section=${encodeURIComponent(section)}&q=${encodeURIComponent(q)}&derive=${derive}`;
+
+        try {
+            const res = await fetch(url, { headers: { "Accept": "application/json" } });
+            const data = await res.json();
+            window.lastOverallPercentages = data.overall_percentages || {};
+            window.lastFilteredPercentages = data.filtered_percentages || {};
+
+            const useFiltered = filter && filter !== 'all';
+            const pctSource = useFiltered ? window.lastFilteredPercentages : window.lastOverallPercentages;
+            const pctLabel = useFiltered ? ({ '7days': 'Weekly', '15days': '15 Days', '30days': 'Monthly' }[filter] || 'Period') : 'Total';
+
+            document.querySelectorAll('.pct-display').forEach(el => {
+                const sid = el.getAttribute('data-sid');
+                if (sid && pctSource[sid] !== undefined) {
+                    const pct = pctSource[sid];
+                    el.innerText = `${pctLabel}: ${pct}%`;
+                    const badgeClass = pct >= 75 ? 'status-success' : (pct >= 65 ? 'status-warning' : 'status-danger');
+                    el.className = `status-badge pct-display pct-student-${sid} ${badgeClass}`;
+                }
+            });
+
+            // Re-render lists silently
+            if (data.eligible && document.getElementById('eligibleList')) renderList('eligibleList', data.eligible, 'Eligible', 'status-success');
+            if (data.condonation && document.getElementById('condonationList')) renderList('condonationList', data.condonation, 'Condonation Required', 'status-warning');
+            if (data.detained && document.getElementById('detainedList')) renderList('detainedList', data.detained, 'Detained', 'status-danger');
+        } catch (e) { console.error("Could not update percentages silently", e); }
+    }
+
+    // ---- Ctrl+Z Undo functionality ----
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.key === 'z') {
+            if (actionHistory.length > 0) {
+                const lastAction = actionHistory.pop();
+                cycleStatus(lastAction.studentId, lastAction.date, lastAction.period, lastAction.previousStatus, lastAction.btn, true);
+
+                // Show a small toast notification for undo
+                const undoToast = document.createElement('div');
+                undoToast.innerHTML = `↩️ Undid attendance toggle for ${lastAction.studentId} (P${lastAction.period})`;
+                undoToast.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1e293b; color:white; padding:10px 20px; border-radius:8px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.2); animation:slideDown 0.3s forwards;";
+                document.body.appendChild(undoToast);
+                setTimeout(() => undoToast.remove(), 2500);
+            }
+        }
+    });
 
     // ---- Show/Hide Lists ----
     function showList(listId) {
@@ -746,7 +821,7 @@
                             <button onclick="viewStudentImages('${sid}')" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer;" title="View Registration Images">📸 Images</button>
                         </div>
                         <div style="margin-top:0.25rem;">
-                            <span class="status-badge ${badgeClass}" style="font-size:0.75rem;">
+                            <span class="status-badge pct-display pct-student-${sid} ${badgeClass}" data-sid="${sid}" style="font-size:0.75rem;">
                                 ${pctLabel}: ${overallPct}%
                             </span>
                         </div>

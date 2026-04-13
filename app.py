@@ -623,17 +623,46 @@ def student_signup():
         con.commit()
         con.close()
 
-        # Save up to 5 images
+        # Save up to 5 images and dynamically encode them
         save_dir = os.path.join(CLEAN_FACES_DIR, reg_no)
         os.makedirs(save_dir, exist_ok=True)
+        
+        new_encodings = []
+        new_names = []
+        
         for idx, b64img in enumerate(images_b64[:5]):
             try:
                 header, data = b64img.split(',', 1) if ',' in b64img else ('', b64img)
                 img_bytes = base64.b64decode(data)
+                
+                # Get encoding dynamically
+                nparr = np.frombuffer(img_bytes, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                if img is not None:
+                    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    boxes = face_recognition.face_locations(rgb, model="hog")
+                    encs = face_recognition.face_encodings(rgb, boxes)
+                    if encs:
+                        new_encodings.append(encs[0])
+                        new_names.append(reg_no)
+                
                 with open(os.path.join(save_dir, f"img_{idx+1}.jpg"), "wb") as f:
                     f.write(img_bytes)
+            except Exception as e:
+                print("Error saving/encoding image:", e)
+
+        # Update encodings.pickle immediately so next camera frame recognizes the new student
+        if new_encodings:
+            try:
+                with open("encodings.pickle", "rb") as f:
+                    data_enc = pickle.load(f)
             except Exception:
-                pass
+                data_enc = {"encodings": [], "names": []}
+            
+            data_enc["encodings"].extend(new_encodings)
+            data_enc["names"].extend(new_names)
+            with open("encodings.pickle", "wb") as f:
+                pickle.dump(data_enc, f)
 
         database.init_today([reg_no])
         database.init_today_periods([reg_no])

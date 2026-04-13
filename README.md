@@ -1,222 +1,186 @@
-# 🎓 Automated Face Recognition Attendance System
+# Automated Face Recognition Attendance System
 
-> A real-time, AI-powered attendance management system built for Bapatla Engineering College using CCTV cameras, face recognition, and a Flask web dashboard.
+**Authors**
 
----
+D Nethrasree (21CSE002)
 
-## 📌 Table of Contents
+**Implementation**
 
-- [About the Project](#about-the-project)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [How It Works](#how-it-works)
-- [User Roles](#user-roles)
-- [Screenshots](#screenshots)
-- [Database](#database)
-- [Future Scope](#future-scope)
+Face Recognition Engine, Flask Web Application, and Attendance Database implementation.
+
+🔗 https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System
 
 ---
 
-## 📖 About the Project
+## Overview
 
-The **Automated Face Recognition Attendance System (AFRAS)** eliminates the need for manual roll calls by automatically detecting and recognizing students' faces through CCTV cameras. Attendance is recorded period-wise in a local SQLite database and is accessible through a web dashboard for both HODs and students.
+The Automated Face Recognition Attendance System (AFRAS) is an AI-powered attendance management system designed to eliminate manual roll calls in academic institutions. The system uses CCTV cameras to automatically detect and recognize students' faces in real time, records attendance period-wise in a local database, and makes it accessible through a web dashboard for both Heads of Department (HODs) and students.
 
-This project was developed as a final-year B.Tech project at **Bapatla Engineering College**.
+The platform also supports manual attendance correction, student self-registration with live webcam photo capture, and automated detection of working days.
 
----
-
-## ✨ Features
-
-- 🎥 **Real-time CCTV face recognition** using OpenCV + `face_recognition` library
-- 📆 **Period-wise attendance tracking** (6 periods per day)
-- 🧑‍💼 **HOD Dashboard** — view, filter, and manually edit attendance
-- 🎓 **Student Dashboard** — view personal attendance percentage & history
-- 🔐 **Secure login** with role-based access (HOD / Student)
-- 📝 **Student self-registration** with live webcam photo capture
-- 🔁 **Forgot Password** recovery using Date of Birth verification
-- 📊 **Attendance categories**: Eligible (≥75%), Condonation (65–75%), Detained (<65%)
-- 🏢 **Multi-department support** — HOD accounts auto-scoped to their department
-- 📅 **Working day detection** — weekends and holidays auto-skipped
-- 📤 **Manual attendance entry** by HOD for missed records
-- 🔄 **Dynamic face encoding** — new students are immediately recognized after signup
+This project was developed as a final-year B.Tech project at **Bapatla Engineering College**, Department of Computer Science and Engineering.
 
 ---
 
-## 🛠️ Tech Stack
+## Project Components
 
-| Layer | Technology |
-|---|---|
-| **Backend** | Python, Flask |
-| **Face Recognition** | `face_recognition`, `dlib`, OpenCV (`cv2`) |
-| **Database** | SQLite3 (local) |
-| **Frontend** | HTML5, CSS3, Jinja2 templates, JavaScript |
-| **Image Processing** | NumPy, Pillow |
-| **Server** | Flask dev server / `.bat` launcher |
+### 1. Face Recognition Engine
+- Captures live video frames from a connected CCTV or webcam
+- Detects faces using the HOG (Histogram of Oriented Gradients) model
+- Matches detected faces against precomputed encodings stored in `encodings.pickle`
+- Automatically marks attendance for the active class period upon recognition
+- Dynamically updates encodings when new students register
 
----
+### 2. Flask Web Application
+- Provides a secure login system with role-based access for HODs and Students
+- HOD Dashboard: view, filter, and manually edit student attendance records
+- Student Dashboard: view personal attendance percentage and period-wise history
+- Supports student self-registration with webcam-based photo capture
+- Includes password recovery using Date of Birth verification
+- Classifies students as Eligible (≥75%), Condonation (65–75%), or Detained (<65%)
 
-## 📁 Project Structure
-
-```
-attendance_cctv/
-│
-├── app.py                    # Main Flask application (all routes)
-├── database.py               # DB schema, init, backfill logic
-├── cctv_attendance.py        # CCTV face detection & auto-marking script
-├── encode_faces.py           # Script to encode face images → encodings.pickle
-├── sanitize_images.py        # Utility to clean face image dataset
-│
-├── attendance.db             # SQLite database (attendance history)
-├── encodings.pickle          # Precomputed face encodings (auto-generated)
-│
-├── requirements.txt          # Python dependencies
-├── start_attendance_server.bat  # One-click server launcher (Windows)
-├── run_server_hidden.vbs     # Hidden background server launcher
-│
-├── templates/                # Jinja2 HTML templates
-│   ├── base.html
-│   ├── login.html
-│   ├── hod_dashboard.html
-│   ├── student_dashboard.html
-│   ├── student_signup.html
-│   ├── hod_signup.html
-│   ├── hod_manual_attendance.html
-│   └── ...
-│
-└── static/                   # CSS, JS, images, fonts
-```
+### 3. Attendance Database
+- Stores all student and HOD account information
+- Records period-wise daily attendance for up to 6 periods per day
+- Automatically initializes attendance records for each working day
+- Detects and skips weekends and holidays (non-working days)
+- Supports backfilling of missed attendance records for past working days
 
 ---
 
-## 🚀 Getting Started
+## System Architecture
 
-### Prerequisites
+The AFRAS system integrates multiple components including a CCTV Camera Feed, Face Detection and Recognition Engine, SQLite Attendance Database, Flask Web Server, HOD Dashboard, and Student Dashboard.
 
-- Python 3.9 or 3.10 (recommended)
-- Windows OS (tested)
-- Webcam / CCTV camera connected
-- `cmake` and Visual Studio Build Tools (for `dlib` compilation)
+These components work together to automate attendance recording and deliver accurate period-wise attendance data to both HODs and students through a centralized web interface.
 
-### Installation
+---
+
+## Technologies Used
+
+**Backend**
+- Python
+- Flask
+- SQLite3
+
+**Face Recognition**
+- face_recognition library
+- dlib
+- OpenCV (cv2)
+
+**Frontend**
+- HTML5
+- CSS3
+- JavaScript
+- Jinja2 Templates
+
+**Image Processing**
+- NumPy
+- Pillow
+
+**Deployment**
+- Windows OS
+- Flask Development Server
+- Batch Script Launcher (.bat)
+
+---
+
+## Key Features
+
+- Real-time face detection and recognition from CCTV camera feed
+- Period-wise attendance tracking (6 periods per day)
+- Role-based access control for HODs and Students
+- Student self-registration with live webcam photo capture
+- Dynamic face encoding — new students recognized immediately after signup
+- Automatic working day detection (weekends and holidays skipped)
+- Manual attendance entry and correction by HOD
+- Attendance eligibility classification (Eligible / Condonation / Detained)
+- Multi-department support with HOD accounts auto-scoped to their department
+- Password recovery using Date of Birth verification
+
+---
+
+## Installation and Setup
 
 **1. Clone the repository**
-```bash
+```
 git clone https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System.git
 cd Automated_Face_Recognition_Attendance_System
 ```
 
 **2. Create and activate a virtual environment**
-```bash
+```
 python -m venv venv
 venv\Scripts\activate
 ```
 
 **3. Install dependencies**
-```bash
+```
 pip install -r requirements.txt
 ```
 
-**4. Run the Flask server**
-```bash
+**4. Run the Flask web application**
+```
 python app.py
 ```
 
-**5. Open in browser**
+**5. Run the CCTV attendance script (in a separate terminal)**
+```
+python cctv_attendance.py
+```
+
+**6. Open the web dashboard in a browser**
 ```
 http://127.0.0.1:5000
 ```
 
-> **Note:** To run CCTV auto-detection in parallel, open a second terminal and run:
-> ```bash
-> python cctv_attendance.py
-> ```
-
-### Re-generate Face Encodings (if needed)
-
-If you add new face images manually to `clean_faces/`:
-```bash
-python encode_faces.py
-```
+> Note: To regenerate face encodings after adding new images manually, run `python encode_faces.py`
 
 ---
 
-## ⚙️ How It Works
+## User Roles
 
-```
-CCTV Camera → OpenCV Frame Capture
-        ↓
-Face Detection (HOG model via face_recognition)
-        ↓
-Face Encoding + Match against encodings.pickle
-        ↓
-Student ID identified → attendance.db updated
-        ↓
-Flask Dashboard → HOD/Student views attendance
-```
-
-1. `cctv_attendance.py` continuously reads frames from the connected camera
-2. Detected faces are compared against stored encodings
-3. When a match is found, the student's attendance is marked as **Present** for the active period
-4. The Flask web app reads from the SQLite database to show real-time results
-
----
-
-## 👤 User Roles
-
-### 🧑‍💼 HOD (Head of Department)
-- Register at `/hod/signup` (auto-scoped to department)
-- View all attendance records with filters (date, year, branch, section)
-- Manually add/edit attendance for any student
+**HOD (Head of Department)**
+- Register at `/hod/signup` with department selection
+- View attendance records with filters by date, year, branch, and section
+- Manually add or edit attendance for any student
 - Delete student records
-- View attendance categories (Eligible / Condonation / Detained)
+- View attendance eligibility categories
 
-### 🎓 Student
-- Register at `/student/signup` (webcam photo capture required)
-- View personal attendance percentage
-- View period-wise attendance history day by day
-- Update profile and change password
-
----
-
-## 🗄️ Database
-
-The project uses a local **SQLite** database (`attendance.db`) with the following main tables:
-
-| Table | Purpose |
-|---|---|
-| `users` | Stores student & HOD accounts (user_id, password, role, branch, year, section) |
-| `attendance` | Legacy daily attendance records |
-| `period_attendance` | Period-wise daily records (6 periods/day, present/absent/value) |
-
-> The `attendance.db` file is included in this repository so that existing attendance history is preserved.
+**Student**
+- Register at `/student/signup` with webcam photo capture (up to 5 photos)
+- View personal attendance percentage and period-wise history
+- Update profile information and change password
+- Recover forgotten password using Date of Birth
 
 ---
 
-## 🔮 Future Scope
+## Research Contribution
 
-- ☁️ Migrate from SQLite to cloud database (PostgreSQL / Firebase)
-- 📧 Email/SMS alerts for low attendance students
-- 📱 Mobile app for students
-- 🤖 Upgrade face recognition to CNN-based deep learning model
-- 📊 Analytics dashboard with charts and export to Excel/PDF
-- 🌐 Deploy on cloud server (AWS / Render / Railway)
-- 📷 Support for multiple simultaneous cameras
+This project demonstrates how Computer Vision and Machine Learning can be applied to automate academic attendance management. By integrating face recognition with a web-based platform, the system removes the dependency on manual roll calls, reduces errors, and provides real-time attendance visibility to both faculty and students.
 
 ---
 
-## 🏫 Institution
+## Future Work
 
-**Bapatla Engineering College**  
+- Migration from SQLite to a cloud-based database such as PostgreSQL or Firebase
+- Email and SMS alerts for students with low attendance
+- Development of a Flutter-based mobile application for students
+- Upgrade face recognition model from HOG to a CNN-based deep learning approach
+- Analytics dashboard with charts and export functionality to Excel and PDF
+- Deployment on a cloud server such as AWS or Render
+- Support for multiple simultaneous CCTV cameras
+
+---
+
+## Department of Computer Science and Engineering
+**Bapatla Engineering College**
 Bapatla, Andhra Pradesh, India
 
 ---
 
-## 📄 License
+## GitHub Repository
 
-This project is developed for academic purposes.
+The source code for the Automated Face Recognition Attendance System is available at:
 
----
-
-> ⭐ If you found this project helpful, please give it a star!
+🔗 https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System

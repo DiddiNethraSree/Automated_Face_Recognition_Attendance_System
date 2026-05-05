@@ -10,9 +10,11 @@ K Venkata Siva Naga Sai (Y22ACS472)
 
 D Rama Lakshman (Y22ACS447)
 
+
 **Implementation**
 
 Face Recognition Engine, Flask Web Application, and Attendance Database implementation.
+
 
 🔗 **GitHub Repo:** https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System
 
@@ -20,7 +22,7 @@ Face Recognition Engine, Flask Web Application, and Attendance Database implemen
 ### 🔑 Live Demo Test Credentials
 You can test the live web application using the following credentials:
 - **Student View:** ID: `21CSE001` | Password: `123`
-- **HOD View:** ID: `cshod` | Password: *(Enter your actual cshod password here)*
+- **HOD View:** ID: `cshod` | Password: `Becbapatla@1`
 ---
 
 ## Overview

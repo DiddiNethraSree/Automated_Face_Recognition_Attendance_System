@@ -14,8 +14,13 @@ D Rama Lakshman (Y22ACS447)
 
 Face Recognition Engine, Flask Web Application, and Attendance Database implementation.
 
-🔗 https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System
+🔗 **GitHub Repo:** https://github.com/DiddiNethraSree/Automated_Face_Recognition_Attendance_System
 
+🌐 **Live Web Dashboard:** [https://nethrasree19.pythonanywhere.com](https://nethrasree19.pythonanywhere.com)
+### 🔑 Live Demo Test Credentials
+You can test the live web application using the following credentials:
+- **Student View:** ID: `21CSE001` | Password: `123`
+- **HOD View:** ID: `cshod` | Password: *(Enter your actual cshod password here)*
 ---
 
 ## Overview
@@ -39,8 +44,8 @@ This project was developed as a final-year B.Tech project at **Bapatla Engineeri
 
 ### 2. Flask Web Application
 - Provides a secure login system with role-based access for HODs and Students
-- HOD Dashboard: view, filter, and manually edit student attendance records
-- Student Dashboard: view personal attendance percentage and period-wise history
+- **HOD Dashboard:** view, filter, and manually edit student attendance records
+- **Student Dashboard:** view personal attendance percentage and period-wise history
 - Supports student self-registration with webcam-based photo capture
 - Includes password recovery using Date of Birth verification
 - Classifies students as Eligible (≥75%), Condonation (65–75%), or Detained (<65%)
@@ -70,7 +75,7 @@ These components work together to automate attendance recording and deliver accu
 - SQLite3
 
 **Face Recognition**
-- face_recognition library
+- `face_recognition` library
 - dlib
 - OpenCV (cv2)
 
@@ -85,9 +90,9 @@ These components work together to automate attendance recording and deliver accu
 - Pillow
 
 **Deployment**
-- Windows OS
+- PythonAnywhere (Cloud Hosting for Web Portal)
+- Windows OS (For local CCTV Engine)
 - Flask Development Server
-- Batch Script Launcher (.bat)
 
 ---
 
